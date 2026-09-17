@@ -1,0 +1,19 @@
+(()=>{const seed=[
+['VAR-001','Existing cornice support requires replacement timber grounds','Second Floor / Front Bedroom','Site','Michael Turner','Draft',0],
+['VAR-002','Additional fire stopping required around service penetrations','Basement / Plant Room','Site','James Cole','With QS',1850],
+['VAR-003','Existing wall substrate unsuitable for specified finish','First Floor / Landing','QS','Sarah Bennett','With QS',0],
+['VAR-004','Additional steel trimming required to revised opening','Ground Floor / Kitchen','Site','Michael Turner','Approved to Proceed',4250],
+['VAR-005','Replace defective existing floor joists discovered on opening up','Second Floor / Rear Bedroom','QS','Sarah Bennett','Approved to Proceed',3680],
+['VAR-006','Additional lime plaster repairs beyond tender allowance','First Floor / Drawing Room','Site','James Cole','Pricing / Finalise',2925],
+['VAR-007','Revised bathroom drainage route due to existing structure','First Floor / Bathroom','Site','Michael Turner','Pricing / Finalise',5160],
+['VAR-008','Additional bespoke joinery infill to revised wall setting out','Ground Floor / Study','QS','Sarah Bennett','Issued',1875],
+['VAR-009','Additional stone repairs identified following cleaning','Front Elevation','Site','James Cole','Issued',7340],
+['VAR-010','Revised electrical containment following ceiling opening up','Basement / Corridor','QS','Sarah Bennett','Issued',2240]
+];
+function ensureDemo(){if(!window.activeProject||activeProject.id!=='halfmoon')return;let d=JSON.parse(localStorage.getItem('variations')||'[]');if(d.some(v=>v.demoSeed))return;let now=new Date(),date=n=>new Date(now.getTime()-n*86400000).toISOString().slice(0,10);seed.forEach((r,i)=>{let status=r[5],v={demoSeed:true,projectId:'halfmoon',projectName:'18 Half Moon Street',projectNumber:'MRG-001',ref:r[0],title:r[1],location:r[2],origin:r[3],raisedBy:r[4],raisedDate:date(14-i),found:r[1]+'.',works:'Additional works recorded and progressed through the variation workflow.',qty:'1',unit:'item',labour:Math.round(r[6]*.35),materials:Math.round(r[6]*.35),subcontract:Math.round(r[6]*.2),other:0,markup:10,total:r[6],status};if(status!=='Draft'){v.issuedToQSDate=date(13-i);v.qsName='Sarah Bennett'}if(['Approved to Proceed','Pricing / Finalise','Issued'].includes(status)){v.approvedToProceed=true;v.approvalDate=date(11-i)}if(status==='Issued'){v.signedBy='Daniel Price';v.signedDate=date(5-i);v.issuedDate=date(4-i)}d.push(v)});localStorage.setItem('variations',JSON.stringify(d));}
+const oldOpen=window.openProject;window.openProject=function(id){oldOpen(id);ensureDemo();if(window.renderHome)renderHome()};
+window.addEventListener('load',()=>{setTimeout(()=>{if(window.activeProject){ensureDemo();if(window.renderHome)renderHome()}},50)});
+const oldShow=window.show;window.show=function(id){oldShow(id);setTimeout(addBack,0)};
+function addBack(){let s=document.querySelector('.screen.active');if(!s||['projects','home'].includes(s.id)||s.querySelector('.autoBack'))return;let b=document.createElement('button');b.className='autoBack';b.textContent='‹ BACK';b.style.cssText='border:0;background:none;padding:0 0 16px;font-weight:800;font-size:12px;letter-spacing:1px;cursor:pointer';b.onclick=()=>{let map={projectEntry:'projects',capture:'home',review:'capture',qsReview:'home',price:'qsReview',signoff:'price',preview:'signoff',register:'home'};oldShow(map[s.id]||'home')};s.prepend(b)}
+function renameButtons(){document.querySelectorAll('button').forEach(b=>{if(b.textContent.trim()==='DOWNLOAD BOQ CSV')b.textContent='DOWNLOAD VARIATIONS FOR BOQ'})}new MutationObserver(renameButtons).observe(document.body,{subtree:true,childList:true});renameButtons();
+})();
